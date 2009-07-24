@@ -36,6 +36,7 @@ class Generic:
 	def __contains__(self, item):
 		return item in self.children
 
+
 class Document(Generic):
 	""" Root Element in a document tree, contains meta information for document """
 	def __init__(self, title=None, author=None, created=None):
@@ -44,16 +45,19 @@ class Document(Generic):
 		self.author  = author
 		self.created = created
 
+
 class Body(Generic):
 	""" Body container """
 	def __init__(self):
 		Generic.__init__(self)
+
 
 class Comment(Generic):
 	""" Comments """
 	def __init__(self, text=None):
 		Generic.__init__(self)
 		self.data = text or ''
+
 
 class Text(Generic):
 	""" Text elements in doc tree """
@@ -69,6 +73,7 @@ class Text(Generic):
 	def __repr__(self):
 		return self.data
 
+
 class Special(Generic):
 	""" Text that is different from its neighbors """
 	def __init__(self): Generic.__init__(self)
@@ -81,11 +86,13 @@ class Special(Generic):
 		self.modifiers = list(set(x.modifiers).union(self.modifiers))
 		return self
 
+
 class Heading(Generic):
 	""" Heading elements in doc tree """
 	def __init__(self, level=0):
 		Generic.__init__(self)
 		self.level = level
+
 
 class Paragraph(Generic):
 	""" Paragraph elements in doc tree """
@@ -106,17 +113,21 @@ class List(Generic):
 		if isinstance(x, List):	self.append(x.children)
 		return self
 
+
 class ListItem(Generic):
 	""" Generic List Item Element """
 	def __init__(self): Generic.__init__(self)
+
 
 class OrderedList(List):
 	""" Numbered Lists """
 	def __init__(self):	Generic.__init__(self)
 
+
 class UnorderedList(List):
 	""" Bulleted Lists """
 	def __init__(self):	Generic.__init__(self)
+
 
 class Table(Generic):
 	""" Table data """
@@ -124,10 +135,12 @@ class Table(Generic):
 		Generic.__init__(self)
 		self.caption = caption
 
+
 class TableRow(Generic):
 	""" Table row """
 	def __init__(self):
 		Generic.__init__(self)
+
 
 class TableCell(Generic):
 	""" Table cells """
@@ -136,12 +149,14 @@ class TableCell(Generic):
 		self.colspan = colspan
 		self.rowspan = rowspan
 
+
 class TableHeader(TableCell):
 	""" Table headers """
 	def __init__(self, colspan=None, rowspan=None, scope='none'): 
 		TableCell.__init__(self, colspan, rowspan)
 		self.scope = scope
-	
+
+
 class Media(Generic):
 	""" Generic Media element """
 	def __init__(self, data=None, name='', descr=''):
@@ -150,12 +165,14 @@ class Media(Generic):
 		self.name  = name
 		self.descr = descr
 
+
 class Image(Media):
 	""" Images linked in a document """
 	def __init__(self, data=None, name='', descr='', height=None, width=None):
 		Media.__init__(self, data, name, descr)
 		self.height = height
 		self.width  = width
+
 
 class Link(Generic):
 	""" Links to other resources or specific locations in a document """

@@ -69,12 +69,17 @@ SYMBOL_MAP   = {  # Unicode (key) to Symbol font (value) mapping
 
 class Docx(generic.Generic):
 	def valid_in(self, input):
-		""" Determines if the passed filename is accepted by this module for input """
-		from zipfile import is_zipfile
-		valid_ext = set(('docx',))
-		ext       = input.split('.').pop().lower()
-		
-		return (ext in valid_ext) and is_zipfile(input)
+		""" Determines if the passed file is accepted by this module for input """
+		#Guess by filename
+		if not getattr(input, "read", False):
+			valid_ext = ('docx',)
+			ext       = input.split('.').pop().lower()
+			return (ext in valid_ext)
+		#Guess by file-like object
+		else:
+			head = input.read(4)
+			input.seek(0)
+			return head == "PK\x03\x04"
 	
 	def get_intermediate(self, input):
 		""" Given an input, returns the intermediate representation of the file """
@@ -83,7 +88,7 @@ class Docx(generic.Generic):
 		import docx
 		import os
 		
-		input = file(input)
+		if not getattr(input, "read", False): input = file(input)
 		input = ZipFile(input, 'r')
 		files = get_input_data(input)
 		input.close()

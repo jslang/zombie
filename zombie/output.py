@@ -16,7 +16,7 @@ class Output:
 		outname = path.basename(out)
 		
 		filename = path.join(outdir, outname)
-		f        = file(filename, 'w')		
+		f        = file(filename, 'w')
 		f.write(self.data)
 		f.close()
 		

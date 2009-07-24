@@ -5,10 +5,10 @@ CHARSET = 'utf-8' #Character encoding for output
 VERBOSE = False
 ASSETS  = dict()  #Assets belonging to document (key:filename, value:data)
 
-class Html(generic.Generic):		
+class Html(generic.Generic):
 	def valid_out(self, output):
 		""" Determines if the passed filename is accepted by this module for output """
-		valid_ext = set(('html', 'htm', 'xhtml', 'xml'))
+		valid_ext = ('html', 'htm', 'xhtml', 'xml')
 		output    = output.split('.')
 		ext       = output.pop().lower()
 		return ext in valid_ext
