@@ -2,7 +2,9 @@ import generic
 
 STYLE_MAP     ={ # Mapping for docx to intermediate styles
 		'i'         : 'emphasis',
+		'Emphasis'  : 'emphasis',
 		'b'         : 'strong',
+		'Strong'    : 'strong',
 		'u'         : 'underline',
 		'vanish'    : 'hidden',
 		'webHidden' : 'hidden',
@@ -197,9 +199,16 @@ def is_specialrun(element):
 	if not element: return False
 	if element.localName == 'r':
 		try:
+			#Check rPr children
 			modifiers = element.getElementsByTagName('w:rPr').pop().childNodes
 			modifiers = [mod for mod in modifiers if mod.localName in STYLE_MAP]
-			return bool(modifiers)
+			if modifiers: return True
+			
+			#Check rStyle values
+			modifiers = element.getElementsByTagName('w:rStyle')
+			modifiers = [mod.getAttribute('w:val') for mod in modifiers]
+			modifiers = [mod for mod in modifiers if mod in STYLE_MAP]
+			if modifiers: return True
 		except (AttributeError, IndexError): pass
 	return False
 
@@ -313,8 +322,12 @@ def get_zombie_specialrun(element, files):
 	from modules import compact
 	
 	rPr       = element.getElementsByTagName('w:rPr').pop()
+	rStyles   = element.getElementsByTagName('w:rStyle')
+	styles    = [style.getAttribute('w:val') for style in rStyles]
+	styles    = set([STYLE_MAP[style] for style in styles if style in STYLE_MAP])
 	modifiers = [child.localName for child in rPr.childNodes]
 	modifiers = set([STYLE_MAP[modifier] for modifier in modifiers if modifier in STYLE_MAP])
+	modifiers = modifiers.union(styles)
 	
 	special           = intermediate.Special()
 	special.modifiers = modifiers
