@@ -23,7 +23,13 @@ class Html(generic.Generic):
 		output = get_html(intermediate)
 		output = output.toprettyxml().encode(html.CHARSET, 'xmlcharrefreplace')
 		output = post_processing(output)
-		output = Output(output, html.ASSETS)
+		meta = {
+			'title'   : intermediate.title,
+			'author'  : intermediate.author,
+			'created' : intermediate.created,
+			'encoding': html.CHARSET,
+			}
+		output = Output(output, html.ASSETS, meta)
 		return output
 
 def post_processing(html):

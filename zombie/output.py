@@ -1,9 +1,10 @@
 class Output:
 	""" The Output class is responsible for describing the converted document
 	and providing any interfaces necessary for the output of that document"""
-	def __init__(self, data, assets=None):
+	def __init__(self, data, assets=None, meta={}):
 		self.data   = data
 		self.assets = assets
+		self.meta   = meta
 		
 	def __repr__(self):
 		return self.data
