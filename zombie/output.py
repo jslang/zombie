@@ -1,3 +1,16 @@
+import threading
+
+class OutputThread (threading.Thread):
+	""" Class to handle threading for output writing """
+	def __init__(self, procedure, *args, **kwargs):
+		self.procedure = procedure
+		self.args      = args
+		self.kwargs    = kwargs
+		super(OutputThread, self).__init__()
+	
+	def run(self):
+		self.procedure(*self.args, **self.kwargs)
+
 class Output:
 	""" The Output class is responsible for describing the converted document
 	and providing any interfaces necessary for the output of that document"""

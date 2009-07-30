@@ -46,7 +46,8 @@ class Zombie:
 		else                                : return False
 		
 	def finalize(self):
-		self.output.final(self.output_file)
+		from output import OutputThread
+		OutputThread(self.output.final, *[self.output_file,]).start()
 	
 	def __get_imod(self, imod=None):
 		""" Get the specified input module, or guess if not given """
