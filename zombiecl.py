@@ -52,8 +52,10 @@ def main():
 		omod   = args['omod'], 
 		title  = args['title']
 	)
-	job.omod.VERBOSE = args['verbose'] or False
-	job.omod.CHARSET = args['encoding'] or 'utf-8'
+	if job.omod:
+		job.omod.VERBOSE = args['verbose'] or False
+		job.omod.CHARSET = args['encoding'] or 'utf-8'
+	
 	if job.convert(): job.finalize()
 	else:
 		errors = ['Conversion failed for the following reasons:',]
