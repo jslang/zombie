@@ -28,26 +28,29 @@ class Zombie:
 	def convert(self):
 		""" Walks through the stages of conversion, input to intermediate, 
 		intermediate to output.  Returns True/False to indicate failure."""
-		
 		#Don't even try if we have no modules to use
 		if not self.imod or not self.omod: return False
 		
-		#Convert from input to intermediate
 		self.intermediate = self.imod.get_intermediate(self.input_file)
 		
-		#Override document title if passed as argument
+		#Override document title if passed as argument to init
 		if self.intermediate and self.title : self.intermediate.title = self.title
 		
-		#Convert from intermediate to output
-		self.output = self.omod.get_output(self.intermediate)		
+		self.output = self.omod.get_output(self.intermediate)
 		
 		#Check for failure
 		if self.intermediate and self.output: return True
 		else                                : return False
 		
 	def finalize(self):
-		from output import OutputThread
-		OutputThread(self.output.final, *[self.output_file,]).start()
+		"""
+		Will call the current job output object's method final in a seperate
+		thread and return that thread.
+		"""
+		from threading import Thread
+		output_thread = Thread(target=self.output.final, args=[self.output_file,])
+		output_thread.start()
+		return output_thread
 	
 	def __get_imod(self, imod=None):
 		""" Get the specified input module, or guess if not given """

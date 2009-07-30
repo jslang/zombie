@@ -56,7 +56,9 @@ def main():
 		job.omod.VERBOSE = args['verbose'] or False
 		job.omod.CHARSET = args['encoding'] or 'utf-8'
 	
-	if job.convert(): job.finalize()
+	if job.convert():
+		output_thread = job.finalize()
+		output_thread.join() #Wait for output thread to rejoin
 	else:
 		errors = ['Conversion failed for the following reasons:',]
 		if not job.imod:
