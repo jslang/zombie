@@ -158,6 +158,7 @@ def get_zombietype(element):
 		'NewLine'       : is_newline,
 		'SpecialRun'    : is_specialrun,
 		'Run'           : is_run,
+		'Insert'        : is_insert,
 		}
 	
 	for type,func in testmap.items():
@@ -224,6 +225,10 @@ def is_run(element):
 	if not element: return False
 	return element.localName == 'r' and not is_specialrun(element)
 
+def is_insert(element):
+	if not element: return False
+	return element.localName == 'ins'
+
 def is_list(element):
 	""" Test for list """
 	if not element: return False
@@ -285,6 +290,7 @@ def get_zombie_unknown(element, files):
 			'trPr', 'smartTagPr', 'tblGrid',
 			'commentRangeStart', 'commentRangeEnd',
 			'commentReference', 'lastRenderedPageBreak',
+			'del',
 	))
 	if element.localName in ignore:
 		return None
@@ -358,6 +364,15 @@ def get_zombie_run(element, files):
 	
 	run = compact(run, lambda x,y: isinstance(x, intermediate.Text) and isinstance(y, intermediate.Text))
 	return run
+
+def get_zombie_insert(element, files):
+	"""
+	Handle Word track change element, insert
+	"""
+	insert = list()
+	for child in element.childNodes:
+		insert.append(get_zombie(child, files))
+	return insert
 
 def get_zombie_link(element, files):
 	""" Get zombie intermediate for link element """
