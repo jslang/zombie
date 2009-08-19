@@ -1,6 +1,6 @@
 import generic
 
-STYLE_MAP     ={ # Mapping for docx to intermediate styles
+STYLE_MAP     ={  # Mapping for docx to intermediate styles
 		'i'         : 'emphasis',
 		'Emphasis'  : 'emphasis',
 		'b'         : 'strong',
@@ -13,21 +13,6 @@ STYLE_MAP     ={ # Mapping for docx to intermediate styles
 		}
 PARSED_FILES = {} # Cache for parsed xml objects
 LIST_STYLES  = {} # Cache for list styles
-
-def unicode_to_symbol(key):
-	import docx
-	map   = docx.SYMBOL_MAP
-	try            : value = map[key]
-	except KeyError: value = map.values()[-1]
-	return int(value, 16)
-
-def symbol_to_unicode(key):
-	import docx
-	map   = dict([(v,k) for k,v in docx.SYMBOL_MAP.items()])
-	try            : value = map[key]
-	except KeyError: value = map.values()[-1]
-	return int(value, 16)
-
 SYMBOL_MAP   = {  # Unicode (key) to Symbol font (value) mapping
 	'0039': '39', '0038': '38', '0035': '35', '0034': '34', '0037': '37',
 	'0036': '36', '0031': '31', '0030': '30', '0033': '33', '0032': '32',
@@ -69,6 +54,24 @@ SYMBOL_MAP   = {  # Unicode (key) to Symbol font (value) mapping
 	'2234': '5C', '039D': '4E', '039E': '58', '039F': '4F', 'F8EF': 'EA',
 	'F8EA': 'E4', '039A': '4B', '039B': '4C', '039C': '4D'}
 
+def unicode_to_symbol(key):
+	"""Returns the symbol code for unicode value key"""
+	import docx
+	map   = docx.SYMBOL_MAP
+	try            : value = map[key]
+	except KeyError: value = map.values()[-1]
+	return int(value, 16)
+
+def symbol_to_unicode(key):
+	"""Returns the unicode for symbol value key"""
+	import docx
+	from time import time
+	map   = dict([(v,k) for k,v in docx.SYMBOL_MAP.items()])
+	try            : value = map[key]
+	except KeyError: value = map.values()[-1]
+	return int(value, 16)
+
+
 class Docx(generic.Generic):
 	def valid_in(self, input):
 		""" Determines if the passed file is accepted by this module for input """
@@ -85,7 +88,6 @@ class Docx(generic.Generic):
 	
 	def get_intermediate(self, input):
 		""" Given an input, returns the intermediate representation of the file """
-		from xml.dom import minidom
 		from zipfile import ZipFile
 		import docx
 		import os
@@ -96,23 +98,27 @@ class Docx(generic.Generic):
 		input.close()
 		
 		docx.PARSED_FILES = dict()
-		document          = parse_file('word/document.xml', files).firstChild		
+		document          = parse_file('word/document.xml', files).firstChild
 		intermediate      = get_zombie(document, files)
 		
 		return intermediate
 
+
 def parse_file(file, files, nocache=False):
-	""" Cache function to expedite repeated requests to parse the same xml
-	Given a file name that points to a key in the dictionary files, will return
-	the parsed string for that xml. Optional boolean nocache will allow you to 
-	force a parse of the xml """
+	"""
+	Parse file returns minidom object parsed from file in files.  Uses a 
+	cache that can be disabled by passing True for argument nocache
+	"""
 	if file not in PARSED_FILES or nocache:
 		from xml.dom import minidom
 		PARSED_FILES[file] = minidom.parseString(files[file])
 	return PARSED_FILES[file]
 
 def get_input_data(input):
-	""" Read all archives in input into a dictionary with filenames as keys and return"""
+	""" 
+	Read all archives in input into a dictionary with filenames as keys and
+	return
+	"""
 	filenames = input.namelist()
 	files     = [input.read(f) for f in filenames]
 	files     = dict(zip(filenames, files))
@@ -135,6 +141,7 @@ def block_compact(element):
 	return element
 
 def get_zombietype(element):
+	""" Returns the type (String) of element passed """
 	testmap = {
 		'Document'      : is_document,
 		'Body'          : is_body,
@@ -353,8 +360,8 @@ def get_zombie_run(element, files):
 	return run
 
 def get_zombie_link(element, files):
+	""" Get zombie intermediate for link element """
 	import intermediate
-	from xml.dom import minidom
 	
 	try:
 		rId  = element.getAttribute('r:id')
@@ -373,6 +380,7 @@ def get_zombie_link(element, files):
 	return link
 
 def get_zombie_text(element, files):
+	""" Get zombie intermediate for text element """
 	import intermediate
 	
 	if element.localName   == 't'  :
@@ -569,7 +577,7 @@ def get_drawing_image(element, files):
 	""" Extracts image information from drawing elements in word XML. """
 	import intermediate
 	import os
-	try: #to find the images data and name
+	try:#to find image data and name
 		blip = element.getElementsByTagName('a:blip').pop(0)
 		rId  = blip.getAttribute('r:embed')
 		rel  = get_relationship(rId, files)
@@ -578,7 +586,7 @@ def get_drawing_image(element, files):
 		imgname = os.path.basename(file)
 	except IndexError: return None
 	
-	try: #to discover dimensions
+	try:#to discover dimensions
 		pixels_per_emu = 12700 #Constant for word's default metric (emu)
 		 
 		extent = element.getElementsByTagName('wp:extent').pop(0)
@@ -593,7 +601,8 @@ def get_pict_image(element, files):
 	""" Extracts image information from pict elements in word XML. """
 	import intermediate
 	import os
-	try:
+	
+	try:#to find image data and name
 		imagedata = element.getElementsByTagName('v:imagedata').pop(0)
 		rId       = imagedata.getAttribute('r:id')
 		title     = imagedata.getAttribute('o:title')
@@ -603,7 +612,7 @@ def get_pict_image(element, files):
 		imgname = os.path.basename(file)
 	except IndexError: return None
 	
-	try:
+	try:#to find image dimensions
 		import re
 		shape  = element.getElementsByTagName('v:shape').pop(0)
 		style  = shape.getAttribute('style')
@@ -620,8 +629,6 @@ def get_pict_image(element, files):
 
 def get_title(files):
 	""" Discover and return the title of the input document """
-	from xml.dom import minidom
-	
 	if not files: return None
 	
 	core  = parse_file('docProps/core.xml', files)
@@ -633,8 +640,6 @@ def get_title(files):
 
 def get_author(files):
 	""" Discover and return the author of the input document """
-	from xml.dom import minidom
-	
 	if not files: return None
 	
 	core   = parse_file('docProps/core.xml', files)
@@ -653,7 +658,6 @@ def get_paragraph_style(element):
 
 def get_list_properties(element, files):
 	""" Return properties of a list, including the type and level """
-	from xml.dom import minidom
 	try:
 		#Retrieve numbering id and list level
 		numbering = parse_file('word/numbering.xml', files)
