@@ -3,12 +3,6 @@ class Zombie:
 	and storing and providing the data that is returned by the input and output
 	modules."""
 	def __init__(self, input, output, imod=None, omod=None, title=None):
-		"""
-		When passing input and output file as strings, input and output are the
-		only required fields.  However, input may also be passed as a file-like
-		object as well, and in this case the imod argument _must_ be specified
-		or a TypeError exception will be thrown..
-		"""
 		from os import path
 		
 		self.title = title
