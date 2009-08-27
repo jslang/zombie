@@ -9,7 +9,10 @@ STYLE_MAP     ={  # Mapping for docx to intermediate styles
 		'vanish'    : 'hidden',
 		'webHidden' : 'hidden',
 		'strike'    : 'strikethrough',
-		'vertAlign' : 'superscript',
+		'vertAlign' : {
+			'superscript' : 'superscript',
+			'subscript'   : 'subscript',
+			},
 		}
 PARSED_FILES = {} # Cache for parsed xml objects
 LIST_STYLES  = {} # Cache for list styles
@@ -334,16 +337,11 @@ def get_zombie_specialrun(element, files):
 	import intermediate
 	from modules import compact
 	
-	rPr       = element.getElementsByTagName('w:rPr').pop()
-	rStyles   = element.getElementsByTagName('w:rStyle')
-	styles    = [style.getAttribute('w:val') for style in rStyles]
-	styles    = set([STYLE_MAP[style] for style in styles if style in STYLE_MAP])
-	modifiers = [child.localName for child in rPr.childNodes]
-	modifiers = set([STYLE_MAP[modifier] for modifier in modifiers if modifier in STYLE_MAP])
-	modifiers = modifiers.union(styles)
+	styles    = get_styles(element)
+	modifiers = get_modifiers(element)
 	
 	special           = intermediate.Special()
-	special.modifiers = modifiers
+	special.modifiers = modifiers.union(styles)
 	
 	for child in element.childNodes:
 		child = get_zombie(child, files)
@@ -703,4 +701,34 @@ def get_list_properties(element, files):
 		type = 'bullet'
 		ilvl = 0
 	return type,ilvl
+
+def get_styles(element):
+	"""
+	Return style strings for a given element, elements found in run style
+	elements.
+	"""
+	rStyles = element.getElementsByTagName('w:rStyle')
+	if not rStyles: return set()
 	
+	styles = [style.getAttribute('w:val') for style in rStyles]
+	styles = [STYLE_MAP[style] for style in styles if style in STYLE_MAP]
+	return set(styles)
+
+def get_modifiers(element):
+	"""
+	Return style modifiers for a given element, elements found in run property
+	elements
+	"""
+	rPr = element.getElementsByTagName('w:rPr')
+	if not rPr: return set()
+	rPr = rPr.pop()
+	
+	modifiers = []
+	for mod in rPr.childNodes:
+		if mod.localName in STYLE_MAP:
+			style = STYLE_MAP[mod.localName]
+			#Special cases for modifiers that have attributes
+			if mod.localName == 'vertAlign': 
+				style = STYLE_MAP[mod.localName][mod.getAttribute('w:val')]
+			modifiers.append(style)
+	return set(modifiers)

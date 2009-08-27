@@ -293,6 +293,14 @@ def get_html_special(intermediate):
 		
 	return special
 
+def get_subscript(element):
+	sub = get_dom('sub')
+	if not element.attributes.items() and element.tagName == 'span':
+		sub.childNodes = element.childNodes
+	else:
+		sub.appendChild(element)
+	return sub
+
 def get_superscript(element):
 	sup = get_dom('sup')
 	if not element.attributes.items() and element.tagName == 'span':
