@@ -20,7 +20,7 @@ SYMBOL_MAP   = {  # Unicode (key) to Symbol font (value) mapping
 	'0039': '39', '0038': '38', '0035': '35', '0034': '34', '0037': '37',
 	'0036': '36', '0031': '31', '0030': '30', '0033': '33', '0032': '32',
 	'007B': '7B', '21B5': 'BF', 'F6D9': 'D3', '002B': '2B', '2321': 'F5',
-	'2320': 'F3', '002C': '2C', '2329': 'E1', '03D2': 'A1', '03D1': '4A',
+	'2320': 'F3', '002C': '2C', '2329': 'E1', '03D2': 'A1', '263A': '4A',
 	'2248': 'BB', '03D6': '76', '03D5': '6A', '002F': '2F', '00F7': 'B8',
 	'2297': 'C4', '002E': '2E', '232A': 'F1', '2295': 'C5', '00AC': 'D8',
 	'2260': 'B9', '007C': '7C', '221A': 'D6', 'F8E7': 'BE', '003E': '3E',
@@ -61,7 +61,7 @@ def unicode_to_symbol(key):
 	"""Returns the symbol code for unicode value key"""
 	import docx
 	map   = docx.SYMBOL_MAP
-	try            : value = map[key]
+	try            : value = map[key.upper()]
 	except KeyError: value = map.values()[-1]
 	return int(value, 16)
 
@@ -70,7 +70,7 @@ def symbol_to_unicode(key):
 	import docx
 	from time import time
 	map   = dict([(v,k) for k,v in docx.SYMBOL_MAP.items()])
-	try            : value = map[key]
+	try            : value = map[key.upper()]
 	except KeyError: value = map.values()[-1]
 	return int(value, 16)
 
@@ -400,6 +400,8 @@ def get_zombie_text(element, files):
 		text = intermediate.Text()
 		for child in element.childNodes: text = text + child.data
 	elif element.localName == 'sym':
+		"""The following is needed to pull the value provided by w:char out of
+		the private use segment of the utf-8 specification."""
 		symbol = element.getAttribute('w:char')
 		symbol = hex(int(symbol, 16) & 0x0FFF)[2:]
 		code   = symbol_to_unicode(symbol)
