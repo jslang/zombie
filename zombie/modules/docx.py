@@ -442,7 +442,7 @@ def get_zombie_text(element, files):
 	
 	if element.localName   == 't'  :
 		text = intermediate.Text()
-		for child in element.childNodes:text = text + mask_each(child.data, 0xFF00)
+		for child in element.childNodes: text = text + mask_each(child.data)
 	elif element.localName == 'sym':
 		symbol = element.getAttribute('w:char')
 		symbol = int(symbol, 16) & 0x0FFF
@@ -640,23 +640,24 @@ def get_drawing_image(element, files):
 	import intermediate
 	import os
 	try:#to find image data and name
-		blip = element.getElementsByTagName('a:blip').pop(0)
-		rId  = blip.getAttribute('r:embed')
-		rel  = get_relationship(rId, files)
-		file = rel.getAttribute('Target')
+		docPr   = element.getElementsByTagName('wp:docPr').pop(0)
+		alt     = docPr.getAttribute('descr');
+		blip    = element.getElementsByTagName('a:blip').pop(0)
+		rId     = blip.getAttribute('r:embed')
+		rel     = get_relationship(rId, files)
+		file    = rel.getAttribute('Target')
 		imgdata = files['word/' + file]
 		imgname = os.path.basename(file)
 	except IndexError: return None
 	
 	try:#to discover dimensions
 		pixels_per_emu = 12700 #Constant for word's default metric (emu)
-		 
 		extent = element.getElementsByTagName('wp:extent').pop(0)
 		x,y    = extent.getAttribute('cx'), extent.getAttribute('cy')
 		x,y    = int(x)/pixels_per_emu, int(y)/pixels_per_emu
 	except IndexError: x,y = None,None
 	
-	image = intermediate.Image(data=imgdata, name=imgname, height=y, width=x)
+	image = intermediate.Image(data=imgdata, name=imgname, height=y, width=x, descr=alt)
 	return image
 
 def get_pict_image(element, files):
@@ -751,13 +752,16 @@ def get_list_properties(element, files):
 		ilvl = 0
 	return type,ilvl
 
-def mask_each(chars, mask):
+def mask_each(chars):
+	"""Knocks private use unicode characters down to common usage (Microsoft
+	encodes keypresses for wingding and symbol fonts in the 0xFF00-0xFFFF range)
+	"""
 	chars = [ord(char) for char in list(chars)]
 	chars = [char & 0x0FF if char > 0xF000 else char for char in chars]
 	chars = [unichr(char) for char in chars]
 	chars = ''.join(chars)
 	return chars
-	
+
 def get_styles(element):
 	"""
 	Return style strings for a given element, elements found in run style
