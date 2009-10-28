@@ -242,7 +242,7 @@ def get_html_image(intermediate):
 	from mimetypes import guess_type
 	mtype, encoding = guess_type(intermediate.name)
 	if mtype is None: mtype = "image/png"
-	src = "data:" + mtype +";base64," + b64encode(intermediate.data)
+	src = "data:%s;base64,%s" % (mtype, b64encode(intermediate.data))
 	img = get_dom('img', src=src, alt=intermediate.descr or 'none')
 	
 	if intermediate.height: img.setAttribute('height', str(intermediate.height))
