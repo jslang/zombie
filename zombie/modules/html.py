@@ -238,12 +238,16 @@ def get_html_tablecell(intermediate):
 
 def get_html_image(intermediate):
 	""" Return image dom node from intermediate """
-	img = get_dom('img', src=intermediate.name, alt=intermediate.descr or 'none')
+	from base64    import b64encode
+	from mimetypes import guess_type
+	mtype, encoding = guess_type(intermediate.name)
+	if mtype is None: mtype = "image/png"
+	src = "data:" + mtype +";base64," + b64encode(intermediate.data)
+	img = get_dom('img', src=src, alt=intermediate.descr or 'none')
 	
 	if intermediate.height: img.setAttribute('height', str(intermediate.height))
 	if intermediate.width : img.setAttribute('width', str(intermediate.width))
 	
-	ASSETS[intermediate.name] = intermediate.data
 	return img
 
 def get_html_list(intermediate, ordered=False):
