@@ -756,9 +756,13 @@ def mask_each(chars):
 	"""Knocks private use unicode characters down to common usage (Microsoft
 	encodes keypresses for wingding and symbol fonts in the 0xFF00-0xFFFF range)
 	"""
-	chars = (ord(char) for char in list(chars))
-	chars = (char & 0x0FF if char > 0xF000 else char for char in chars)
-	chars = (unichr(char) for char in chars)
+	def masker(char):
+		if char > 0xF000: return char & 0x0FF
+		else            : return char
+	
+	chars = [ord(char) for char in list(chars)]
+	chars = map(masker, chars)
+	chars = [unichr(char) for char in chars]
 	chars = ''.join(chars)
 	return chars
 
