@@ -280,8 +280,16 @@ def is_list(element):
 	""" Test for list """
 	if not element: return False
 	if element.localName == 'p':
-		pPrs     = [child for child in element.childNodes if child.localName == 'pPr']
-		return True in ['numPr' in [child.localName for child in pPr.childNodes] for pPr in pPrs]
+		pPrs   = [child for child in element.childNodes if child.localName == 'pPr']
+		if len(pPrs) < 1: return False
+		
+		for pPr in pPrs:
+			numPrs = [child for child in pPr.childNodes if child.localName == 'numPr']
+			if len(numPrs) < 1: return False
+			for numPr in numPrs:
+				for child in numPr.childNodes:
+					if child.localName == 'ilvl' or child.localName == 'numId':
+						return True
 	else: return False
 
 def is_table(element):
