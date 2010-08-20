@@ -11,5 +11,5 @@ setup(name="zombie",
       #dependency_links=[],
       #install_requires=[],
       packages=find_packages(),
-      keywords="docx xhtml convert",
+      keywords="docx xhtml convert semantic accessible",
       zip_safe= True,)
