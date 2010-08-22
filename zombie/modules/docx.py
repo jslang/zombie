@@ -530,7 +530,12 @@ def get_zombie_image(element, files):
 	
 	#Add a prefix to prevent asset overwriting
 	if image != None:
-		from hashlib import md5
+		try:
+			from hashlib import md5
+		except ImportError:
+			# For Python < 2.5
+			from md5 import md5
+			
 		prefix = md5(image.data).hexdigest()[:5]
 		name   = image.name.split('.')
 		name.insert(-1, prefix)
