@@ -1,4 +1,4 @@
-== Description ==
+## Description ##
 
 Zombie is an application that is meant to provide an easily extensible tool to 
 convert a document from one format to another. Actual conversion takes place in
@@ -10,12 +10,12 @@ Zombie itself is responsible for the handling of input and output, as well as
 loading the appropriate modules for conversion. Additionally, it is to monitor 
 for any errors that may occur and inform the user appropriately.
 
-== Usage ==
+## Usage ##
 
 Zombie can be used via the command-line as a standalone program or as part of a
 python program as a python module.
 
-===Command Line Usage===
+### Command Line Usage ###
 
 General usage of zombie with an INPUT file and OUTPUT file would be:
 
@@ -34,43 +34,35 @@ A more detailed help description can be found by running:
 
 `python zombiecl.py --help`
 
-===Module Usage===
+### Module Usage ###
 
 Importing the zombie module should be sufficient to use it in another python 
 application.  This can be achieved by doing the following:
 
-{{{
-from zombie import Zombie
-
-job = Zombie(input=INPUT, output=OUTPUT)
-if job.convert(): job.finalize()
-}}}
+	from zombie import Zombie
+	job = Zombie(input=INPUT, output=OUTPUT)
+	if job.convert(): job.finalize()
 
 The converted document can be accessed without finalizing it.  The Output object
 defined by Zombie.output contains all the data from the conversion.
 
-{{{
-from zombie import Zombie
+	from zombie import Zombie
+	job = Zombie(input=INPUT, output=OUTPUT)
+	if job.convert():
+	    document = job.output.data     #The actual data for the converted document.
+	    assets   = job.output.assets   #Any ancillary assets needed by the document.
 
-job = Zombie(input=INPUT, output=OUTPUT)
-if job.convert():
-    document = job.output.data     #The actual data for the converted document.
-    assets   = job.output.assets   #Any ancillary assets needed by the document.
-}}}
-        
 In this way you can do whatever you wish with the outputted document.
-        
-===Miscellaneous===
-        
+
+### Miscellaneous ###
+
 Some output modules support the optional encoding argument.  This can specify 
 which encoding to use for output, such as utf-8, ascii, etc.  As a module this 
 is achieved by the following:
-        
-{{{
-job = Zombie(input=INPUT, output=OUTPUT)
-job.omod.CHARSET = 'utf-8'
-if job.convert(): job.finalize()
-}}}
-        
+
+	job = Zombie(input=INPUT, output=OUTPUT)
+	job.omod.CHARSET = 'utf-8'
+	if job.convert(): job.finalize()
+
 For command line usage, refer to the command line help for the appropriate 
 option to pass.
